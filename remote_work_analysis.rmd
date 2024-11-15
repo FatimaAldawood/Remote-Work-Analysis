@@ -1,0 +1,213 @@
+---
+title: "Remote_Work_Impact"
+author: "Fatimah Aldawood"
+date: "2024-11-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Impact Of Remote Work On Employees
+
+## The columns namess of the database:
+
+### Dataset Source:
+The dataset used in this analysis is from Kaggle: [Remote Work and Mental Health Dataset](https://www.kaggle.com/datasets/waqi786/remote-work-and-mental-health).
+  
+Install libraries 
+```{r}
+install.packages("tidyverse")
+library(tidyverse)
+library(ggplot2)
+library(here)
+library(skimr)
+library(janitor)
+library(dplyr)
+```
+
+
+```{r cars}
+remote_work <- read.csv("remote_work_cleaned.csv")
+colnames(remote_work)
+```
+
+## Plots
+
+
+```{r pressure, echo=FALSE}
+remote_work %>%
+  count(Work_Location) %>%
+  ggplot(aes(x = "", y = n, fill = Work_Location)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  labs(title = "Distribution of Work Locations of Employees", subtitle ="Distribution is fairly balanced with each category") +
+  theme_void()
+
+```
+
+
+The pie chart shows a balanced distribution of employees across work locations: **Remote Work** (33.4%), **On-Site Work** (32.2%), and **Hybrid Work** (34.4%)
+
+
+
+```{r}
+ggplot(remote_work, aes(x = Work_Location, fill = Gender)) +
+  geom_bar(alpha = 0.5, position = "dodge") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())+
+  labs(x = "Work Location", y = "Count", title = "Distribution of Employees by Work Location and Gender",
+       subtitle = "On-site location have a higher proportion of male, 
+while remote location have a higher proportion of  female")
+```
+
+```{r}
+ggplot(remote_work, aes(x = Job_Role, fill = Work_Location)) +
+  geom_bar(alpha = 0.5, position = "dodge") +
+  theme_bw() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels at 45 degrees
+  ) +
+  labs(x = "Job Role", y = "Count", title = "Distribution of Job Role by Work Location", subtitle = "Software engineers work remotely the most, 
+followed by marketing  and data scientists")
+```
+```{r}
+remote_work %>% 
+  filter(Job_Role %in% c("Software Engineer", "Marketing", "Data Scientist")) %>% 
+  ggplot(aes(Job_Role, fill = Gender)) +
+  geom_bar(position = "dodge", alpha = 0.5) +
+  labs(x = "Job Role", y = "Count", title = "Gender Distribution by Role in Top Remote Work Positions", subtitle = "More males work in data engineering and marketing, 
+while more females work in data science") +
+  theme_bw() +
+  theme (
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+  )
+
+```
+```{r}
+remote_work %>% arrange(Stress_Level) %>% 
+  filter(Stress_Level == "High") %>% 
+  ggplot(aes(x = Stress_Level, fill = Work_Location)) +
+  geom_bar(alpha = 0.5, position = "dodge") +
+  theme_bw() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()) +
+  labs(x = "Stress Level", y = "Count", title = "High Stress Level by Work Location", subtitle = "Remote work locations have the highest stress levels")
+```
+
+```{r}
+remote_work %>%
+  filter(Work_Location  == "Remote") %>% 
+  mutate(High_Stress = ifelse(Stress_Level == "High", "High Stress", "Not High Stress")) %>%
+  count(High_Stress) %>%
+  ggplot(aes(x = "", y = n, fill = High_Stress)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  labs(title = "Proportion of Remote Employees with High Stress Levels" , subtitle = "Over 50% of workers don't experience stress while working remotely") +
+  theme_void()
+```
+
+#### Recommendations To Mange Stress Of Remote Work Location :
+
+
+1. **Conduct an Employee Stress and Work Preference Survey**
+   - Identify stress causes among remote employees (e.g., workload, communication challenges).
+   - Collect preferences for work setups (remote, on-site, hybrid) and reasons for choices.
+   - Gather suggestions on resources or support to enhance their work experience.
+
+2. **Offer Remote Work Training Programs**
+   - Train employees on work-life balance, stress management, and effective collaboration.
+   - Include modules on mental health awareness and maintaining productivity.
+
+3. **Implement Regular Check-Ins and Feedback Mechanisms**
+   - Schedule consistent check-ins to monitor stress levels and provide support.
+   - Establish anonymous feedback channels for employee concerns and suggestions.
+   - Use feedback to identify and address recurring stressors.
+
+```{r}
+remote_work %>%
+  filter(Work_Location == "Remote") %>% 
+  count(Satisfaction_with_Remote_Work) %>%
+  ggplot(aes(x = "", y = n, fill = Satisfaction_with_Remote_Work)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  labs(title = "Satisfaction of Employees With Remote Work ", subtitle = "Fairly balanced distribution of satisfaction,
+neutrality, and dissatisfaction ") +
+  theme_void()
+```
+
+
+
+#### Recommendatins To Manage Dissatisfaction With Remote Work 
+
+
+1. **Conduct a Survey to Address Remote Work Dissatisfaction**
+   - Create a survey to identify specific dissatisfaction factors and use results to make targeted improvements.
+
+2. **Set Clear Expectations and Goals**
+   - Ensure employees have a clear understanding of their roles, goals, and performance expectations.
+   - Provide guidelines for remote work and establish regular check-ins to monitor progress and provide support.
+
+3. **Offer Flexibility and Autonomy**
+   - Offer options for hybrid work or flexible work arrangements based on individual preferences and work requirements.
+
+```{r}
+ggplot(remote_work, aes(x = Work_Location, y = Hours_Worked_Per_Week, fill = Work_Location)) +
+  geom_boxplot(alpha = 0.5) +
+  theme_bw() +
+  labs(x = "Work Location", y = "Hours Worked Per Week", title = "Hours Worked Per Week by Work Location", subtitle = "Remote work shows excellent performance, 
+with minimum hours surpassing those of other locations")
+```
+
+```{r}
+remote_work %>% 
+  filter(Work_Location == "Remote") %>% 
+  ggplot(aes(x = Gender, y = Work_Life_Balance_Rating, fill = Gender)) +
+  geom_boxplot(alpha = 0.5) +
+  theme_bw() +
+  labs(x = "Gender", y = "Work-Life Balance Rating ", title = "Remote Work-Life Balance Rating by Gender" ,subtitle = "Box Plot Indicates Remote Workers Have a Moderately Good 
+Work-Life Balance, with Scores Centered Around 3")
+```
+```{r}
+remote_work %>% 
+  filter(Work_Location == "Remote") %>% 
+  ggplot(aes( y = Work_Life_Balance_Rating, fill = Job_Role)) +
+  geom_boxplot(alpha = 0.5) +
+  theme_bw() +
+  theme (
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+  ) +
+
+  labs(x = "Gender", y = "Remote Work-Life Balance Rating", title = "Work-Life Balance Rating By Job Role" ,subtitle = "Software Engineers Experience the Best Work-Life Balance in Remote Work")
+
+```
+
+
+
+
+#### Recommendations for Improving Work Location and Work-Life Balance:
+
+
+
+1. **Address Job Role-Specific Challenges**
+   - Investigate and address challenges faced by job roles with lower remote work-life balance ratings.
+   - Offer targeted interventions to alleviate stressors specific to these roles.
+
+2. **Survey Employee Preferences**
+   - Conduct a survey to understand employees' preferred work locations (remote, hybrid, or on-site) and their reasons for these preferences.
+   - Use this data to inform policies and practices that align with employee desires.
+
+3. **Tailor Work Arrangements by Role**
+   - Customize work location options based on job role needs, ensuring flexibility while considering the nature of each position.
+
+4. **Monitor and Adjust Work Location Policies**
+   - Regularly assess employee satisfaction with their work arrangements and collect feedback on challenges.
+   - Adjust policies to maintain a productive and satisfied workforce.
+
